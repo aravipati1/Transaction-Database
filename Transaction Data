@@ -1,0 +1,43 @@
+class InMemoryDB:
+
+    def __init__(self):
+        self.transaction_total = {}
+        self.inProg_transaction = False
+        self.transaction_res = {}
+
+    def get(self, key):
+        if key in self.transaction_res:
+            return self.transaction_res[key]
+        elif key in self.transaction_total:
+            return self.transaction_total[key]
+        else:
+            return None   
+
+
+    def put(self, key, value):
+        if not self.inProg_transaction:
+            raise Exception("Put function cannot be performed. No transaction in progress.")
+
+        self.transaction_res[key] = value
+
+
+    def begin_transaction(self):
+        if self.inProg_transaction:
+            raise Exception("Transaction already in progress")
+        self.inProg_transaction = True
+        self.transaction_res = {}
+
+    def commit(self):
+        if not self.inProg_transaction:
+            raise Exception("Commit function cannot be performed. No transaction in progress.")
+
+        self.transaction_total.update(self.transaction_res)
+        self.inProg_transaction = False
+        self.transaction_res = {}
+
+    def rollback(self):
+        if not self.inProg_transaction:
+            raise Exception("Rollback function cannot be performed. No transaction in progress.")
+
+        self.inProg_transaction = False
+        self.transaction_res = {}
